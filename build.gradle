@@ -1,0 +1,18 @@
+plugins {
+    id 'com.gradleup.shadow' version '8.3.4'
+    id 'java'
+    id 'application'
+}
+
+group = 'me.datafox.borg-caller'
+version = '1.0.0'
+
+mainClassName = 'me.datafox.borgcaller.BorgCaller'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'io.vacco.jsonbeans:jsonbeans:1.0.0'
+}
