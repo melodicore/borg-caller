@@ -7,7 +7,7 @@ plugins {
 group = 'me.datafox.borg-caller'
 version = '1.0.0'
 
-mainClassName = 'me.datafox.borgcaller.BorgCaller'
+mainClassName = 'me.datafox.borg_runner.Runner'
 
 repositories {
     mavenCentral()

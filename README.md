@@ -1,42 +1,82 @@
-Borg-caller is a simple Java application for automating borg backups.
+Borg-runner is a simple Java application for automating borg backups.
 
-Run the application with one argument that points to a json settings file. Below is an example settings file:
+Run the application with one argument that points to a json settings file. Below is an example settings file with the
+minimal required arguments for the application to run:
 
 ```json
 {
-"repo": "repository address",
-"pass": "repository passphrase",
-"dirs": [
-	{
-		"dir": "/home/user/folder",
-		"name": "folder",
-		"excludes": [
-			"*.7z",
-			"*.mp4"
-		],
-		"daily": 7,
-		"weekly": 5,
-		"monthly": 6,
-		"yearly": 10
-	}
-]
+  "dryRun": false,
+  "archives": [
+    {
+      "directories": [
+        "/home/user/dir"
+      ],
+      "name": "backup"
+    }
+  ]
 }
 ```
 
-You can set up as many dirs as you want. The script will first run `borg create` for all dirs, then `borg prune` for all
-dirs and finally `borg compact`. Each dir will have its own archive, with the archive name being 
-`{hostname}-[dir.name]-{now}`.
+With this setup, you must have environment variables `BORG_REPO` and `BORG_PASSPHRASE` set. These environment variables
+will be ignored if the respective settings fields are set. For these and many more options, here is an example settings 
+file with all possible fields set:
 
-Create will be run with arguments 
-`--verbose --filter AMCE --list --stats --show-rc --compression lzma --exclude-caches` as well as 
-`--exclude [dir.exclude[i]]` for every string in the `dir.exclude` array. 
-
-Prune will be run with arguments `--list --glob-archives {hostname}-[dir.name]-* --show-rc` as well as 
-`--keep-daily [dir.daily]`, `--keep-weekly [dir.weekly]`, `--keep-monthly [dir.monthly]` and 
-`--keep-yearly [dir.yearly]` according to the dir settings, unless the integer is set to a number smaller than 1, in 
-which case the whole argument is omitted.
-
-Compact will be run with the `--verbose` argument.
+```json
+{
+"repo": "repo address",
+"passphrase": "repo passphrase",
+"prefix": "{hostname}-",
+"suffix": "-{now}",
+"pruneSuffix": "-*",
+"dryRun": false,
+"extraFlags": [
+    "--show-rc"
+],
+"extraCompactFlags": [
+    "--verbose"
+],
+"archives": [
+    {
+        "directories": [
+            "/home/user/dir",
+            "/home/user/other"
+        ],
+        "name": "backup",
+        "createStats": true,
+        "createList": true,
+        "filter": "AMCE",
+        "exclude": [
+            "*.7z",
+            "**/build"
+        ],
+        "excludeFrom": [
+            "/home/user/exclude.txt"
+        ],
+        "excludeCaches": true,
+        "excludeIfPresent": [
+            "EXCLUDE.FILE"
+        ],
+        "keepExcludeTags": false,
+        "extraCreateFlags": [
+            "--verbose"
+        ],
+        "pruneStats": true,
+        "pruneList": true,
+        "keepWithin": "30d",
+        "keepSecondly": 1,
+        "keepMinutely": 0,
+        "keepHourly": 1,
+        "keepDaily": 7,
+        "keepWeekly": 5,
+        "keepMonthly": 12,
+        "keepYearly": 10,
+        "extraPruneFlags": [
+            "--verbose"
+        ]
+    }
+]
+}
+```
 
 The application checks for the presence of environment variables `SSH_AUTH_SOCK` and `SSH_AGENT_PID` for SSH 
 authentication. If either of them is not defined, [keychain](https://www.funtoo.org/Funtoo:Keychain) will be used 
