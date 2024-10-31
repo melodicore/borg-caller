@@ -2,6 +2,8 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.4'
     id 'java'
     id 'application'
+    id 'org.graalvm.buildtools.native' version '0.10.3'
+    id 'org.gradlex.extra-java-module-info' version '1.9'
 }
 
 group = 'me.datafox.borg-caller'
@@ -15,4 +17,24 @@ repositories {
 
 dependencies {
     implementation 'io.vacco.jsonbeans:jsonbeans:1.0.0'
+}
+
+extraJavaModuleInfo {
+    module('jsonbeans-1.0.0.jar', 'io.vacco.jsonbeans') {
+        exportAllPackages()
+    }
+}
+
+graalvmNative {
+    binaries {
+        main {
+            imageName = "borg-runner"
+            mainClass = "me.datafox.borg_runner.Runner"
+            buildArgs.add("-O4")
+            buildArgs.add("--features=me.datafox.borg_runner.GraalReflectionFeature")
+            javaLauncher = javaToolchains.launcherFor {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+        }
+    }
 }
